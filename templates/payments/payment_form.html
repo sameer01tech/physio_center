@@ -1,0 +1,152 @@
+<!-- templates/payments/payment_form.html -->
+{% extends 'base.html' %}
+
+{% block title %}{% if form.instance.id %}Edit{% else %}Add{% endif %} Payment - Physio Center{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="fas fa-{% if form.instance.id %}edit{% else %}plus-circle{% endif %}"></i>
+        {% if form.instance.id %}Edit{% else %}Add{% endif %} Payment
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'payment_list' %}" class="btn btn-sm btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to List
+        </a>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Payment Information</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <strong>Please correct the errors below:</strong>
+                        <ul>
+                            {% for field, errors in form.errors.items %}
+                                {% for error in errors %}
+                                    <li>{{ field }}: {{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.customer.id_for_label }}" class="form-label">
+                                Customer *
+                            </label>
+                            {{ form.customer }}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.amount.id_for_label }}" class="form-label">
+                                Total Amount *
+                            </label>
+                            {{ form.amount }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.paid_amount.id_for_label }}" class="form-label">
+                                Paid Amount *
+                            </label>
+                            {{ form.paid_amount }}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.payment_date.id_for_label }}" class="form-label">
+                                Payment Date *
+                            </label>
+                            {{ form.payment_date }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.due_date.id_for_label }}" class="form-label">
+                                Due Date *
+                            </label>
+                            {{ form.due_date }}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.payment_mode.id_for_label }}" class="form-label">
+                                Payment Mode
+                            </label>
+                            {{ form.payment_mode }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.transaction_id.id_for_label }}" class="form-label">
+                                Transaction ID
+                            </label>
+                            {{ form.transaction_id }}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.notes.id_for_label }}" class="form-label">
+                            Notes
+                        </label>
+                        {{ form.notes }}
+                    </div>
+
+                    <div class="alert alert-info">
+                        <strong>Note:</strong> Payment status will be automatically calculated based on paid amount.
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{% url 'payment_list' %}" class="btn btn-secondary me-md-2">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i>
+                            {% if form.instance.id %}Update{% else %}Create{% endif %} Payment
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+ {% if not form.instance.id %}
+<script>
+    // Add Bootstrap classes to form fields
+    document.addEventListener('DOMContentLoaded', function() {
+        const inputs = document.querySelectorAll('input, textarea, select');
+        inputs.forEach(input => {
+            input.classList.add('form-control');
+        });
+        
+        // Set default dates if not editing
+       
+        const today = new Date().toISOString().split('T')[0];
+        const paymentDateField = document.getElementById('{{ form.payment_date.id_for_label }}');
+        const dueDateField = document.getElementById('{{ form.due_date.id_for_label }}');
+        
+        if (paymentDateField && !paymentDateField.value) {
+            paymentDateField.value = today;
+        }
+        if (dueDateField && !dueDateField.value) {
+            const dueDate = new Date();
+            dueDate.setDate(dueDate.getDate() + 30); // 30 days from today
+            dueDateField.value = dueDate.toISOString().split('T')[0];
+        }
+       
+    });
+</script>
+ {% endif %}
+{% endblock %}

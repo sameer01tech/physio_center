@@ -1,0 +1,150 @@
+<!-- templates/payments/payment_list.html -->
+{% extends 'base.html' %}
+
+{% block title %}Payments - Physio Center{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="fas fa-money-bill-wave"></i> Payments</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'payment_create' %}" class="btn btn-sm btn-outline-primary">
+            <i class="fas fa-plus"></i> Add Payment
+        </a>
+    </div>
+</div>
+
+<!-- Filters and Search -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <form method="get" class="d-flex">
+            <input type="text" class="form-control me-2" placeholder="Search customer or transaction..." name="q" value="{{ query }}">
+            <button class="btn btn-outline-primary" type="submit">
+                <i class="fas fa-search"></i>
+            </button>
+        </form>
+    </div>
+    <div class="col-md-4">
+        <select class="form-select" onchange="window.location.href = this.value">
+            <option value="?">All Status</option>
+            <option value="?status=Paid" {% if status_filter == 'Paid' %}selected{% endif %}>Paid</option>
+            <option value="?status=Pending" {% if status_filter == 'Pending' %}selected{% endif %}>Pending</option>
+            <option value="?status=Partial" {% if status_filter == 'Partial' %}selected{% endif %}>Partial</option>
+        </select>
+    </div>
+</div>
+
+<!-- Payment Summary -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>₹{{ total_paid|default:0 }}</h4>
+                        <p class="mb-0">Total Paid</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-money-bill-wave fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-warning">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>₹{{ total_pending|default:0 }}</h4>
+                        <p class="mb-0">Total Pending</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-clock fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-info">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>{{ total_payments }}</h4>
+                        <p class="mb-0">Total Records</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-list fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Payments Table -->
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Customer</th>
+                        <th>Amount</th>
+                        <th>Paid</th>
+                        <th>Pending</th>
+                        <th>Status</th>
+                        <th>Payment Date</th>
+                        <th>Due Date</th>
+                        <th>Payment Mode</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payment in payments %}
+                    <tr>
+                        <td>
+                            <strong>{{ payment.customer.customer_name }}</strong>
+                            <br><small class="text-muted">{{ payment.customer.contact_number }}</small>
+                        </td>
+                        <td>₹{{ payment.amount }}</td>
+                        <td>₹{{ payment.paid_amount }}</td>
+                        <td>₹{{ payment.pending_amount }}</td>
+                        <td>
+                            <span class="badge bg-{% if payment.status == 'Paid' %}success{% elif payment.status == 'Pending' %}danger{% else %}warning{% endif %}">
+                                {{ payment.status }}
+                            </span>
+                        </td>
+                        <td>{{ payment.payment_date|date:"d M Y" }}</td>
+                        <td>
+                            <span class="{% if payment.due_date < today %}text-danger{% endif %}">
+                                {{ payment.due_date|date:"d M Y" }}
+                            </span>
+                        </td>
+                        <td>{{ payment.payment_mode|default:"-" }}</td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'payment_edit' payment.id %}" class="btn btn-warning" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'customer_payments' payment.customer.contact_number %}" class="btn btn-info" title="View All">
+                                    <i class="fas fa-list"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" class="text-center py-4">
+                            <i class="fas fa-money-bill-wave fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No payment records found.</p>
+                            <a href="{% url 'payment_create' %}" class="btn btn-primary">Add Payment Record</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
