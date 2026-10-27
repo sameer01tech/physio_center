@@ -25,5 +25,3 @@ Built using **Python, Django, and MySQL**, this application aims to reduce manua
 | JavaScript | Frontend interactivity |
 
 *Note: The frontend technologies listed above can be adjusted to match your actual implementation.*
-
-## 📂 Project Structure
